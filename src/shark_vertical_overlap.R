@@ -10,7 +10,6 @@
 
 library(tidyverse)
 library(cluster)
-library(factoextra)
 library(proxy)
 
 ## Read in metadata
@@ -57,7 +56,7 @@ species_counts <- med_depths %>% group_by(Species) %>% summarize(n = length(uniq
 species_sub <- species_counts$Species[species_counts$n >= 5]
 n_sp <- length(species_sub)
 
-## Summarize depth distribution for each species, with depth bins as columns
+## Summarize depth distribution for each species as proportion by depth bin
 depth_binned <- med_depths %>% 
   filter(Species %in% species_sub) %>% 
   group_by(Species) %>% 
@@ -65,6 +64,10 @@ depth_binned <- med_depths %>%
   group_by(Species, Depth_bin, n_obs) %>% 
   tally() %>% 
   mutate(p = n/n_obs) %>% select(-n_obs, -n) %>%
+  complete(Species, Depth_bin, fill = list(p = 0))
+
+## Pivot to wide format for calculating distance matrices
+depth_binned_wide <- depth_binned %>% 
   pivot_wider(names_from = Depth_bin, values_from = p, values_fill = 0) %>% 
   column_to_rownames("Species")
 
@@ -80,12 +83,24 @@ schoener <- function(x, y) 1 - (1 - 0.5 * sum(abs(x - y)))
 
 ## Create distance matrices for each metric
 dists <- list(
-  bhattacharya = dist(depth_binned, method = bhattacharya),
-  schoener = dist(depth_binned, method = schoener), 
-  euclidian = dist(depth_binned)
+  bhattacharya = dist(depth_binned_wide, method = bhattacharya),
+  schoener = dist(depth_binned_wide, method = schoener), 
+  euclidian = dist(depth_binned_wide)
 )
 
 saveRDS(dists, "./output/distance_matrices.rds")
 
 ## Hierarchical clustering for each metric
 clusters <- lapply(dists, hclust, method = "complete")
+
+## Plot Heat maps and clusters ------------------------------------------------
+
+depth_binned %>% 
+  mutate(Species = factor(Species, levels = x$Species)) %>% 
+  filter(as.numeric(Depth_bin) < 11) %>% 
+  ggplot(aes(Depth_bin, Species, fill = p)) + geom_tile() + 
+  scale_fill_viridis_c(option = "inferno") + 
+  theme(legend.position = "top", 
+        axis.title.y = element_blank()) + 
+  coord_cartesian(expand = FALSE) + 
+  labs(x = "Depth bin")
