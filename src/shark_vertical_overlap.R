@@ -92,7 +92,7 @@ dists <- list(
 saveRDS(dists, "./output/distance_matrices.rds")
 
 ## Hierarchical clustering for each metric
-clusters <- lapply(dists, hclust, method = "complete")
+clusters <- lapply(dists, hclust, method = "ward.D2")
 
 ## Plot Heat maps and clusters ------------------------------------------------
 
@@ -110,37 +110,58 @@ cluster_heatmap <- function(depth_data, cluster_data, max_depth = 100, tree_dept
   
   cluster_ggdata <- ggdendro::dendro_data(cluster_data)
   cluster_ggdata <- cluster_ggdata$segments %>% 
-    mutate(y = max_depth + (y * tree_depth),
-           yend = max_depth + (yend * tree_depth))
+    mutate(y = 1 + max_depth + ((y/max(yend)) * tree_depth),
+           yend = 1 + max_depth + ((yend/max(yend)) * tree_depth))
   
   depth_data <- depth_data %>% 
-    mutate(Species = factor(Species, levels = sp_order), 
+    mutate(Species = factor(Species, levels = clust_order), 
            y = as.numeric(Species)) %>%
     mutate(Depth = (as.numeric(Depth_bin) - 0.5) * 10)
   
   depth_data %>% 
     filter(Depth <= max_depth) %>% 
     ggplot(aes(Depth, Species, fill = p)) + 
-    geom_tile(color = "black") + 
+    geom_tile(color = "black", size = 0.6) + 
     geom_segment(aes(x = y, y = x, xend = yend, yend = xend), 
                  data = cluster_ggdata, size = 0.8, inherit.aes = FALSE) +
     scale_fill_viridis_c(option = "inferno") + 
-    coord_cartesian(expand = FALSE) + 
+    coord_cartesian(expand = FALSE, clip = "off") + 
     labs(x = "Depth (m)") + 
     scale_x_continuous(breaks = seq(0, max_depth, 10)) + 
-    guides(fill = guide_colorbar(barwidth = 15, barheight = 0.8, ticks.linewidth = 1, 
-                                 ticks.colour = "black", frame.colour = "black", 
-                                 frame.linewidth = 1)) + 
-    theme(legend.position = "bottom", 
+    guides(fill = guide_colorbar("proportion time at depth", title.position = "top", 
+                                 title.hjust = 0.5, barwidth = 15, barheight = 0.5, 
+                                 ticks.linewidth = 1, ticks.colour = "black", 
+                                 frame.colour = "black", frame.linewidth = 1)) + 
+    theme(legend.position = "top", 
           axis.title.y = element_blank(),
           panel.border = element_blank(),
           panel.grid = element_blank(),
           panel.background = element_blank(),
           axis.ticks = element_line(color = "black"), 
           axis.text = element_text(color = "black"), 
-          legend.justification = c(0, 0),
-          legend.title = element_blank())
+          legend.justification = c(0, 0), 
+          legend.text = element_text(size = 8), 
+          legend.title = element_text(size = 10))
   
 }
 
-cluster_heatmap(depth_binned, clusters$bhattacharya)
+
+## Cluster by Bhattacharya (dis)similarity
+bhattacharya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharya)
+
+ggsave("./output/bhattacharya_heatmap.png", height = 5, width = 8, 
+       units = "in", dpi = 500)
+
+
+## Cluster by Schoener's D
+schoener_heatmap <- cluster_heatmap(depth_binned, clusters$schoener)
+
+ggsave("./output/schoener_heatmap.png", height = 5, width = 8, 
+       units = "in", dpi = 500)
+
+
+## Cluster by Euclidian distance
+euclidian_heatmap <- cluster_heatmap(depth_binned, clusters$euclidian)
+
+ggsave("./output/euclidian_heatmap.png", height = 5, width = 8, 
+       units = "in", dpi = 500)
