@@ -64,6 +64,7 @@ depth_binned <- med_depths %>%
   group_by(Species, Depth_bin, n_obs) %>% 
   tally() %>% 
   mutate(p = n/n_obs) %>% select(-n_obs, -n) %>%
+  ungroup() %>% 
   complete(Species, Depth_bin, fill = list(p = 0))
 
 ## Pivot to wide format for calculating distance matrices
@@ -95,12 +96,51 @@ clusters <- lapply(dists, hclust, method = "complete")
 
 ## Plot Heat maps and clusters ------------------------------------------------
 
-depth_binned %>% 
-  mutate(Species = factor(Species, levels = x$Species)) %>% 
-  filter(as.numeric(Depth_bin) < 11) %>% 
-  ggplot(aes(Depth_bin, Species, fill = p)) + geom_tile() + 
-  scale_fill_viridis_c(option = "inferno") + 
-  theme(legend.position = "top", 
-        axis.title.y = element_blank()) + 
-  coord_cartesian(expand = FALSE) + 
-  labs(x = "Depth bin")
+## Function to plot heatmap of species depth distributions up to `max_depth`
+## With dendrogram plot of cluster results, rescaled to `tree_depth`
+## Pass depth_binned as `depth_data`
+## Past results of hierarchical clustering (i.e. clusters$...) as cluster_data
+cluster_heatmap <- function(depth_data, cluster_data, max_depth = 100, tree_depth = 80) {
+  
+  require("tidyverse")
+  require("ggdendro")
+  
+  clust_order <- cluster_data$labels[cluster_data$order]
+  n_species <- length(clust_order)
+  
+  cluster_ggdata <- ggdendro::dendro_data(cluster_data)
+  cluster_ggdata <- cluster_ggdata$segments %>% 
+    mutate(y = max_depth + (y * tree_depth),
+           yend = max_depth + (yend * tree_depth))
+  
+  depth_data <- depth_data %>% 
+    mutate(Species = factor(Species, levels = sp_order), 
+           y = as.numeric(Species)) %>%
+    mutate(Depth = (as.numeric(Depth_bin) - 0.5) * 10)
+  
+  depth_data %>% 
+    filter(Depth <= max_depth) %>% 
+    ggplot(aes(Depth, Species, fill = p)) + 
+    geom_tile(color = "black") + 
+    geom_segment(aes(x = y, y = x, xend = yend, yend = xend), 
+                 data = cluster_ggdata, size = 0.8, inherit.aes = FALSE) +
+    scale_fill_viridis_c(option = "inferno") + 
+    coord_cartesian(expand = FALSE) + 
+    labs(x = "Depth (m)") + 
+    scale_x_continuous(breaks = seq(0, max_depth, 10)) + 
+    guides(fill = guide_colorbar(barwidth = 15, barheight = 0.8, ticks.linewidth = 1, 
+                                 ticks.colour = "black", frame.colour = "black", 
+                                 frame.linewidth = 1)) + 
+    theme(legend.position = "bottom", 
+          axis.title.y = element_blank(),
+          panel.border = element_blank(),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          axis.ticks = element_line(color = "black"), 
+          axis.text = element_text(color = "black"), 
+          legend.justification = c(0, 0),
+          legend.title = element_blank())
+  
+}
+
+cluster_heatmap(depth_binned, clusters$bhattacharya)
