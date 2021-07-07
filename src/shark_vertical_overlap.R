@@ -14,6 +14,7 @@ library(factoextra)
 library(ggdendro)
 library(proxy)
 library(PNWColors)
+library(ggtext)
 
 ## Read in individual tag metadata
 metadata <- read.csv("./data/Individual_tag_metadata.csv")
@@ -127,22 +128,22 @@ ggsave("./output/cluster_number_euclidian.png")
 
 ## Plot heat maps and clusters ------------------------------------------------
 
-## Habitats to color species names by
+## Habitats corresponding to each species
+species_metadata$habitat_short <- ifelse(
+  trimws(species_metadata$Habitat) == "Oceanic", "o", 
+  ifelse(trimws(species_metadata$Habitat) == "Coastal", "c", "t")
+)
 species_habitats <- setNames(
-  trimws(species_metadata$Habitat), 
+  species_metadata$habitat_short, 
   trimws(species_metadata$Species..common.)
 )
 
-## Colors for habitat types
-habitat_colors <- setNames(
-  c("#0369af", "grey20", "#30ae82"),
-  c("Oceanic", "Coastal transient", "Coastal")
-)
-
-
 ## Function to convert hierarchical clustering output to data frame
-## With column indicating the cluster each line segment belongs to 
+## With column indicating the cluster each line segment belongs to
+## Function is from atrebas.github.io/post/2019-06-08-lightweight-dendrograms/
 dendro_data_k <- function(hc, k) {
+  
+  require("ggdendro")
   
   hcdata    <-  ggdendro::dendro_data(hc, type = "rectangle")
   seg       <-  hcdata$segments
@@ -174,44 +175,54 @@ dendro_data_k <- function(hc, k) {
 ## Pass depth_binned as `depth_data`
 ## Past results of hierarchical clustering (i.e. clusters$...) as cluster_data
 cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habitats, 
-                            colors = habitat_colors, max_depth = 100, tree_depth = 80) {
+                            max_depth = 100, tree_depth = 80) {
   
   require("tidyverse")
-  require("ggdendro")
+  require("ggtext")
   
+  ## reorder species according to hierarchical clustering results
   clust_order <- cluster_data$labels[cluster_data$order]
   habitats <- habitats[clust_order]
-  colors <- colors[habitats]
+  
+  ## Colors for clusters on dendrogram
   d_colors <- c("grey40", pnw_palette("Bay", n = k))
   
+  ### Convert hierarchical clustering output to data frame
   cluster_ggdata <- dendro_data_k(cluster_data, k)
-  #cluster_ggdata <- ggdendro::dendro_data(cluster_data)
+  ## Shift and rescale dendrogram for plotting beside heatmap
   cluster_ggdata <- cluster_ggdata$segments %>% 
     mutate(y = 1 + max_depth + ((y/max(yend)) * tree_depth),
            yend = 1 + max_depth + ((yend/max(yend)) * tree_depth), 
            line = factor(clust == 0))
   
+  ## Select vertices at which to place cluster labels
   cluster_labels <- cluster_ggdata %>% filter(clust != 0) %>% 
     group_by(clust) %>% filter(yend == max(yend)) %>% ungroup() %>% 
     mutate(rank = order(xend))
   
+  ## Order and re-number clusters by vertical position in plot
   cluster_ggdata$clust <- as.numeric(factor(
     cluster_ggdata$clust, 
     levels = cluster_labels$clust[cluster_labels$rank]
   ))
   cluster_ggdata$clust[is.na(cluster_ggdata$clust)] <- 0
   cluster_ggdata$clust <- factor(cluster_ggdata$clust)
-  
   cluster_labels$rank <- factor(cluster_labels$rank)
   
+  ## Change depth bins to numeric variable so ticks can be placed at 10m intervals
   depth_data <- depth_data %>% 
     mutate(Species = factor(Species, levels = clust_order), 
            y = as.numeric(Species)) %>%
     mutate(Depth = (as.numeric(Depth_bin) - 0.5) * 10)
+  depth_data$Species_label <- factor(paste0(
+    "**", depth_data$Species, "** *", habitats[depth_data$Species], "*"
+  ), levels = paste0("**", clust_order, "** *", habitats, "*")
+  )
   
+  ## Plot heatmap and dendrogram
   depth_data %>% 
     filter(Depth <= max_depth) %>% 
-    ggplot(aes(Depth, Species, fill = p)) + 
+    ggplot(aes(Depth, Species_label, fill = p)) + 
     geom_tile(color = "black", size = 0.6) + 
     geom_segment(aes(x = y, y = x, xend = yend, yend = xend, linetype = line, color = clust), 
                  data = cluster_ggdata, size = 0.8, inherit.aes = FALSE, 
@@ -234,8 +245,8 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
           panel.grid = element_blank(),
           panel.background = element_blank(),
           axis.ticks = element_line(color = "black"), 
-          axis.text.x = element_text(color = "black"), 
-          axis.text.y = element_text(color = colors, face = "bold"),
+          axis.text.x = element_text(color = "black"),
+          axis.text.y = element_markdown(color = "black"),
           legend.justification = c(0, 0), 
           legend.text = element_text(size = 8), 
           legend.title = element_text(size = 10))
