@@ -12,8 +12,11 @@ library(tidyverse)
 library(cluster)
 library(proxy)
 
-## Read in metadata
+## Read in individual tag metadata
 metadata <- read.csv("./data/Individual_tag_metadata.csv")
+
+## Read in species metadata
+species_metadata <- read.csv("./data/species_metadata.csv")
 
 ## list time series files
 ts_files <- list.files("./data/time series data", full.names = TRUE)
@@ -100,7 +103,8 @@ clusters <- lapply(dists, hclust, method = "ward.D2")
 ## With dendrogram plot of cluster results, rescaled to `tree_depth`
 ## Pass depth_binned as `depth_data`
 ## Past results of hierarchical clustering (i.e. clusters$...) as cluster_data
-cluster_heatmap <- function(depth_data, cluster_data, max_depth = 100, tree_depth = 80) {
+cluster_heatmap <- function(depth_data, cluster_data, species_labels,
+                            max_depth = 100, tree_depth = 80) {
   
   require("tidyverse")
   require("ggdendro")
@@ -144,6 +148,12 @@ cluster_heatmap <- function(depth_data, cluster_data, max_depth = 100, tree_dept
           legend.title = element_text(size = 10))
   
 }
+
+## Labels for species nodes
+species_cats <- setNames(
+  trimws(species_metadata$Habitat), 
+  trimws(species_metadata$Species..common.)
+)
 
 
 ## Cluster by Bhattacharya (dis)similarity
