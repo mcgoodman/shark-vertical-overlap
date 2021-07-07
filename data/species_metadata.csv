@@ -1,40 +1,40 @@
 Species (common),Species (latin),Trophic level,Source,"Max 
-body size (kg)",Source,Length at first maturity (TL),Source,Length at Maturity,Source,Habitat,Source,,,,
-Arctic skate,Amblyraja hyperborea,3.98,Ebert & Bizzarro 2007,5.2,Byrkjedal et al 2014,,,94,Fishbase.org,Oceanic,Last et al. 2016,,,,
-Basking shark,Cetorhinus maximus,3.2,Cortes 1999,4000,Fishbase.org,,,500,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Big skate,Beringraja binoculata,3.84,Ebert & Bizzarro 2007,91,Fishbase.org,,,130,Fishbase.org,Coastal transient,Last et al. 2016,,,,
-Bigeye thresher shark,Alopias superciliosus,4.2,Cortes 1999,363.8,Fishbase.org,,,154,Fishbase.org,Coastal transient,Ebert et al 2013,,,,
-Blacktip shark,Carcharhinus limbatus,4.2,Cortes 1999,122.8,Fishbase.org,150,Branstetter 1987,120,Fishbase.org,Coastal  ,Speed et al 2010,,,,
-Blue shark,Prionace glauca,4.1,Cortes 1999,205.9,Fishbase.org,210,White 2007,170,Fishbase.org,Oceanic,Queiroz et al 2016,,,,
-Bluntnose sixgill shark ,Hexanchus griseus,4.3,Cortes 1999,590,Fishbase.org,,,400,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Broadnose sevengill shark,Notorynchus cepedianus,4.7,Cortes 1999,107,Fishbase.org,,,192,Fishbase.org,Coastal ,Barnett et al 2010,,,,
-Bronze whaler shark ,Carcharhinus brachyurus,4.2,Cortes 1999,304.6,Fishbase.org,200,"Lucifora, Menni & Escalante 2005",245,Fishbase.org,Coastal ,Ebert et al 2013,,,,
-Bull shark,Carcharhinus leucas,4.3,Cortes 1999,316.5,Fishbase.org,190,"Cruz-Martinez, Chiappa-Carrara & Arenas-Fuentes 2004",180,Fishbase.org,Coastal  ,Speed et al 2010,,,,
-Caribbean reef shark ,Carcharhinus perezi,3.5,Bond et al 2018,69.9,Fishbase.org,,,152,Fishbase.org,Coastal  ,Speed et al 2010,,,,
-Chilean devil ray,Mobula tarapacana,3.8,Fishbase.org,350,Fishbase.org,,,270,"White, Giles, Dharmadi & Potter 2006",Oceanic,Thorrold et al 2014,,,,
-Common sawshark,Pristiophorus cirratus,4.2,Fishbase.org,1.9,Raoult et al 2017,,,97,Fishbase.org,Coastal transient,Burke et al 2020,,,,
-Common thresher shark,Alopias vulpinus,4.2,Cortes 1999,348,Fishbase.org,120,Mendizabal & Oriza 1995,226,Fishbase.org,Coastal transient,Ebert et al 2013,,,,
-Cuban dogfish,Squalus cubensis,4.2,Cortes 1999,6.1,Pulver and Whatley 2016,,,50,Fishbase.org,Oceanic,Shipley et al 2017,,,,
-Galapagos shark,Carcharhinus galapagensis,4.2,Cortes 1999,85.5,Fishbase.org,205,"Wetherbee, Crow & Lowe 1996",215,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Greenland shark,Somniosus microcephalus,4.2,Cortes 1999,775,Fishbase.org,,,244,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Grey reef shark,Carcharhinus amblyrhynchos,4.1,Cortes 1999,33.7,Fishbase.org,,,96,Fishbase.org,Coastal  ,Speed et al 2010,,,,
-Longfin mako shark,Isurus paucus,4.3,Cortes 1999,566,Gilmore 1983,,,205,Fishbase.org,Oceanic,Queiroz et al 2016,,,,
-Munk's devil ray,Mobula munkiana,3.8,Fishbase.org,25,mantatrust.org/mobula-munkiana,95,Serrano-Lopez 2009,97,Lopez 2009,Coastal,Last et al. 2016,,,,
-Oceanic manta ray,Mobula birostris,3.5,Fishbase.org,3000,Fishbase.org,,,380,Fishbase.org,Coastal transient,Marshall et al. 2009,,,,
-Oceanic whitetip shark ,Carcharhinus longimanus,4.2,Cortes 1999,167.4,Fishbase.org,172,"Joung, Chen, Hsu & Liu 2016",180,Fishbase.org,Oceanic,Ebert et al 2013,,,,
-Pelagic stingray ,Pteroplatytrygon violacea,4.13,Varghese et al 2014,49,Mollet et al 2002 (captive though),,,40,Fishbase.org,Oceanic,Last et al. 2016,,,,
-Pelagic thresher shark ,Alopias pelagicus,4.2,Cortes 1999,62,Otake and Mizue 1981,245.6,Perez-Jimenex 1997,260,Fishbase.org,Oceanic,Ebert et al 2013,,,,
-Porbeagle shark,Lamna nasus,4.2,Cortes 1999,230,Fishbase.org,,,170,Fishbase.org,Coastal transient,Ebert et al 2013,,,,
-Reef manta ray,Mobula alfredi,2.92,Peel et al 2019,700,mantatrust.org/mobula-alfredi,,,370,Fishbase.org,Coastal,Marshall et al. 2009,,,,
-Salmon shark,Lamna ditropis,4.5,Fishbase.org,175,Fishbase.org,,,221,Fishbase.org,Coastal transient,Ebert et al 2013,,,,
-Scalloped hammerhead ,Sphyrna lewini,4.1,Cortes 1999,152.4,Fishbase.org,136,deBruyn 2005,140,Fishbase.org,Coastal transient,Spaet et al 2017,,,,
-School shark,Galeorhinus galeus,4.2,Cortes 1999,44.7,Fishbase.org,,,120,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Shortfin mako shark,Isurus oxyrinchus,4.3,Cortes 1999,505.8,Fishbase.org,,,275,Fishbase.org,Coastal transient,Francis et al 2018,,,,
-Silky shark,Carcharhinus falciformis,4.2,Cortes 1999,346,Fishbase.org,175,Joung 2008,202,Fishbase.org,Oceanic,Curnick et al 2020,,,,
-Silvertip shark,Carcharhinus albimarginatus,4.2,Cortes 1999,162.2,Fishbase.org,193,White 2007,160,Fishbase.org,Coastal,Ebert et al 2013,,,,
-Southern stingray,Hypanus americanus,3.5,Fishbase.org,135.6,Fishbase.org,,,75,Fishbase.org,Coastal,Schwanck et al 2020,,,,
-Spinetail devil ray,Mobula mobula,3.4,Fishbase.org,300,mantatrust.org/mobula-mobular,,,198,Fishbase.org,Coastal transient,Last et al. 2016,,,,
-Starry smooth-hound,Mustelus asterias,3.7,Cortes 1999,4.8,Fishbase.org,,,85,Fishbase.org,Coastal,Ebert et al 2013,,,,
-Tiger shark,Galeocerdo cuvier,4.1,Cortes 1999,807.4,Fishbase.org,300,White 2007,210,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-Whale shark,Rhincodon typus,3.5,Cortes 1999,34000,Fishbase.org,,,440,Fishbase.org,Coastal transient,Speed et al 2010,,,,
-White shark,Carcharodon carcharias,4.5,Cortes 1999,2530,Christiansen et al 2014,,,450,Fishbase.org,Coastal transient,Speed et al 2010,,,,
+body size (kg)",Source,Length at first maturity (TL),Source,Length at Maturity,Source,Habitat,Source
+Arctic skate,Amblyraja hyperborea,3.98,Ebert & Bizzarro 2007,5.2,Byrkjedal et al 2014,,,94,Fishbase.org,Oceanic,Last et al. 2016
+Basking shark,Cetorhinus maximus,3.2,Cortes 1999,4000,Fishbase.org,,,500,Fishbase.org,Coastal transient,Speed et al 2010
+Big skate,Beringraja binoculata,3.84,Ebert & Bizzarro 2007,91,Fishbase.org,,,130,Fishbase.org,Coastal transient,Last et al. 2016
+Bigeye thresher shark,Alopias superciliosus,4.2,Cortes 1999,363.8,Fishbase.org,,,154,Fishbase.org,Coastal transient,Ebert et al 2013
+Blacktip shark,Carcharhinus limbatus,4.2,Cortes 1999,122.8,Fishbase.org,150,Branstetter 1987,120,Fishbase.org,Coastal  ,Speed et al 2010
+Blue shark,Prionace glauca,4.1,Cortes 1999,205.9,Fishbase.org,210,White 2007,170,Fishbase.org,Oceanic,Queiroz et al 2016
+Bluntnose sixgill shark ,Hexanchus griseus,4.3,Cortes 1999,590,Fishbase.org,,,400,Fishbase.org,Coastal transient,Speed et al 2010
+Broadnose sevengill shark,Notorynchus cepedianus,4.7,Cortes 1999,107,Fishbase.org,,,192,Fishbase.org,Coastal ,Barnett et al 2010
+Bronze whaler shark,Carcharhinus brachyurus,4.2,Cortes 1999,304.6,Fishbase.org,200,"Lucifora, Menni & Escalante 2005",245,Fishbase.org,Coastal ,Ebert et al 2013
+Bull shark,Carcharhinus leucas,4.3,Cortes 1999,316.5,Fishbase.org,190,"Cruz-Martinez, Chiappa-Carrara & Arenas-Fuentes 2004",180,Fishbase.org,Coastal  ,Speed et al 2010
+Caribbean reef shark,Carcharhinus perezi,3.5,Bond et al 2018,69.9,Fishbase.org,,,152,Fishbase.org,Coastal  ,Speed et al 2010
+Chilean devil ray,Mobula tarapacana,3.8,Fishbase.org,350,Fishbase.org,,,270,"White, Giles, Dharmadi & Potter 2006",Oceanic,Thorrold et al 2014
+Common sawshark,Pristiophorus cirratus,4.2,Fishbase.org,1.9,Raoult et al 2017,,,97,Fishbase.org,Coastal transient,Burke et al 2020
+Common thresher shark,Alopias vulpinus,4.2,Cortes 1999,348,Fishbase.org,120,Mendizabal & Oriza 1995,226,Fishbase.org,Coastal transient,Ebert et al 2013
+Cuban dogfish,Squalus cubensis,4.2,Cortes 1999,6.1,Pulver and Whatley 2016,,,50,Fishbase.org,Oceanic,Shipley et al 2017
+Galapagos shark,Carcharhinus galapagensis,4.2,Cortes 1999,85.5,Fishbase.org,205,"Wetherbee, Crow & Lowe 1996",215,Fishbase.org,Coastal transient,Speed et al 2010
+Greenland shark,Somniosus microcephalus,4.2,Cortes 1999,775,Fishbase.org,,,244,Fishbase.org,Coastal transient,Speed et al 2010
+Grey reef shark,Carcharhinus amblyrhynchos,4.1,Cortes 1999,33.7,Fishbase.org,,,96,Fishbase.org,Coastal  ,Speed et al 2010
+Longfin mako shark,Isurus paucus,4.3,Cortes 1999,566,Gilmore 1983,,,205,Fishbase.org,Oceanic,Queiroz et al 2016
+Munk's devil ray,Mobula munkiana,3.8,Fishbase.org,25,mantatrust.org/mobula-munkiana,95,Serrano-Lopez 2009,97,Lopez 2009,Coastal,Last et al. 2016
+Oceanic manta ray,Mobula birostris,3.5,Fishbase.org,3000,Fishbase.org,,,380,Fishbase.org,Coastal transient,Marshall et al. 2009
+Oceanic whitetip shark,Carcharhinus longimanus,4.2,Cortes 1999,167.4,Fishbase.org,172,"Joung, Chen, Hsu & Liu 2016",180,Fishbase.org,Oceanic,Ebert et al 2013
+Pelagic stingray ,Pteroplatytrygon violacea,4.13,Varghese et al 2014,49,Mollet et al 2002 (captive though),,,40,Fishbase.org,Oceanic,Last et al. 2016
+Pelagic thresher shark,Alopias pelagicus,4.2,Cortes 1999,62,Otake and Mizue 1981,245.6,Perez-Jimenex 1997,260,Fishbase.org,Oceanic,Ebert et al 2013
+Porbeagle shark,Lamna nasus,4.2,Cortes 1999,230,Fishbase.org,,,170,Fishbase.org,Coastal transient,Ebert et al 2013
+Reef manta ray,Mobula alfredi,2.92,Peel et al 2019,700,mantatrust.org/mobula-alfredi,,,370,Fishbase.org,Coastal,Marshall et al. 2009
+Salmon shark,Lamna ditropis,4.5,Fishbase.org,175,Fishbase.org,,,221,Fishbase.org,Coastal transient,Ebert et al 2013
+Scalloped hammerhead shark,Sphyrna lewini,4.1,Cortes 1999,152.4,Fishbase.org,136,deBruyn 2005,140,Fishbase.org,Coastal transient,Spaet et al 2017
+School shark,Galeorhinus galeus,4.2,Cortes 1999,44.7,Fishbase.org,,,120,Fishbase.org,Coastal transient,Speed et al 2010
+Shortfin mako shark,Isurus oxyrinchus,4.3,Cortes 1999,505.8,Fishbase.org,,,275,Fishbase.org,Coastal transient,Francis et al 2018
+Silky shark,Carcharhinus falciformis,4.2,Cortes 1999,346,Fishbase.org,175,Joung 2008,202,Fishbase.org,Oceanic,Curnick et al 2020
+Silvertip shark,Carcharhinus albimarginatus,4.2,Cortes 1999,162.2,Fishbase.org,193,White 2007,160,Fishbase.org,Coastal,Ebert et al 2013
+Southern stingray,Hypanus americanus,3.5,Fishbase.org,135.6,Fishbase.org,,,75,Fishbase.org,Coastal,Schwanck et al 2020
+Spinetail devil ray,Mobula mobula,3.4,Fishbase.org,300,mantatrust.org/mobula-mobular,,,198,Fishbase.org,Coastal transient,Last et al. 2016
+Starry smooth-hound shark,Mustelus asterias,3.7,Cortes 1999,4.8,Fishbase.org,,,85,Fishbase.org,Coastal,Ebert et al 2013
+Tiger shark,Galeocerdo cuvier,4.1,Cortes 1999,807.4,Fishbase.org,300,White 2007,210,Fishbase.org,Coastal transient,Speed et al 2010
+Whale shark,Rhincodon typus,3.5,Cortes 1999,34000,Fishbase.org,,,440,Fishbase.org,Coastal transient,Speed et al 2010
+White shark,Carcharodon carcharias,4.5,Cortes 1999,2530,Christiansen et al 2014,,,450,Fishbase.org,Coastal transient,Speed et al 2010

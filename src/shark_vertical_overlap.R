@@ -103,14 +103,14 @@ clusters <- lapply(dists, hclust, method = "ward.D2")
 ## With dendrogram plot of cluster results, rescaled to `tree_depth`
 ## Pass depth_binned as `depth_data`
 ## Past results of hierarchical clustering (i.e. clusters$...) as cluster_data
-cluster_heatmap <- function(depth_data, cluster_data, species_labels,
+cluster_heatmap <- function(depth_data, cluster_data, species_habitats, habitat_colors,
                             max_depth = 100, tree_depth = 80) {
   
   require("tidyverse")
   require("ggdendro")
   
   clust_order <- cluster_data$labels[cluster_data$order]
-  n_species <- length(clust_order)
+  species_habitats <- species_habitats[clust_order]
   
   cluster_ggdata <- ggdendro::dendro_data(cluster_data)
   cluster_ggdata <- cluster_ggdata$segments %>% 
@@ -150,11 +150,10 @@ cluster_heatmap <- function(depth_data, cluster_data, species_labels,
 }
 
 ## Labels for species nodes
-species_cats <- setNames(
+species_habitats <- setNames(
   trimws(species_metadata$Habitat), 
   trimws(species_metadata$Species..common.)
 )
-
 
 ## Cluster by Bhattacharya (dis)similarity
 bhattacharya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharya)
