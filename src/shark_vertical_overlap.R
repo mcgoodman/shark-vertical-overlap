@@ -74,29 +74,79 @@ depth_binned <- med_depths %>%
   ungroup() %>% 
   complete(Species, Depth_bin, fill = list(p = 0))
 
+write.csv(depth_binned, "./output/depth_binned.csv")
+
 ## Pivot to wide format for calculating distance matrices
 depth_binned_wide <- depth_binned %>% 
   pivot_wider(names_from = Depth_bin, values_from = p, values_fill = 0) %>% 
   column_to_rownames("Species")
 
-## Dissimilarity matrices & Hierarchical clustering ---------------------------
+## Similarity and Dissimilarity matrices --------------------------------------
 
 ## Bhattacharyya's coefficient - dissimilarity function
 ## Measures similarity between two probability distributions
-bhattacharyya <- function(x, y) 1 - sum(sqrt(x * y))
+## If dist = TRUE, returns a dissimilarity
+bhattacharyya <- function(x, y, dist = TRUE) {
+  if (dist) 1 - sum(sqrt(x * y)) else sum(sqrt(x * y))
+} 
 
 ## Schoener's D - dissimilarity function
 ## Measures how equally two species use space relative to availability
-schoener <- function(x, y) 1 - (1 - 0.5 * sum(abs(x - y)))
+schoener <- function(x, y, dist = TRUE) {
+  if (dist) 1 - (1 - 0.5 * sum(abs(x - y))) else 1 - 0.5 * sum(abs(x - y))
+}
 
 ## Create distance matrices for each metric
 dists <- list(
-  bhattacharyya = dist(depth_binned_wide, method = bhattacharyya),
-  schoener = dist(depth_binned_wide, method = schoener), 
-  euclidian = dist(depth_binned_wide)
+  bhattacharyya = proxy::dist(depth_binned_wide, method = bhattacharyya),
+  schoener = proxy::dist(depth_binned_wide, method = schoener), 
+  euclidian = proxy::dist(depth_binned_wide)
 )
 
 saveRDS(dists, "./output/distance_matrices.rds")
+
+## Create Bhattacharyya and Schoener's D similarity matrices
+simils <- list(
+  bhattacharyya = proxy::simil(depth_binned_wide, method = bhattacharyya, dist = FALSE),
+  schoener = proxy::simil(depth_binned_wide, method = schoener, dist = FALSE)
+)
+
+saveRDS(simils, "./output/similarity_matrices.rds")
+
+## Format Bhattacharyya similarity matrix for plotting
+bhattacharyya_long <- as.matrix(simils$bhattacharyya)
+bhattacharyya_long[upper.tri(bhattacharyya_long)] <- NA
+bhattacharyya_long <- data.frame(
+  species1 = colnames(bhattacharyya_long)[col(bhattacharyya_long)], 
+  species2 = rownames(bhattacharyya_long)[row(bhattacharyya_long)], 
+  bhattacharyya = c(bhattacharyya_long)
+)
+bhattacharyya_long <- na.omit(bhattacharyya_long)
+
+## Plot Bhattacharyya similarity matrix
+bhattacharyya_plot <- bhattacharyya_long %>% 
+  mutate(species2 = forcats::fct_rev(species2)) %>% 
+  ggplot(aes(species1, species2, fill = bhattacharyya)) + 
+  geom_tile(color = "black", size = 0.6) + 
+  scale_fill_viridis_c(option = "magma") + 
+  theme_minimal() + 
+  theme(axis.title = element_blank(),
+        axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5), 
+        axis.text.y = element_text(color = "black"),
+        legend.position = c(0.75, 0.75), 
+        legend.direction = "horizontal") + 
+  guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
+                               title.hjust = 0.5, barwidth = 10, barheight = 0.7, 
+                               ticks.linewidth = 1, ticks.colour = "black", 
+                               frame.colour = "black", frame.linewidth = 1)) + 
+  coord_fixed()
+
+
+ggsave("./output/bhattacharyya_matrix.png", bhattacharyya_plot, height = 7, 
+       width = 7, units = "in", dpi = 500)
+
+
+## Hierarchical clustering ----------------------------------------------------
 
 ## Hierarchical clustering for each metric
 clusters <- lapply(dists, hclust, method = "ward.D2")
@@ -124,6 +174,16 @@ fviz_nbclust(
 ) + ggtitle("Euclidian distance")
 
 ggsave("./output/cluster_number_euclidian.png")
+
+## Compute Bhattacharyya's coefficient and save output
+bhattacharyya_matrix <- proxy::dist(
+  depth_binned_wide, 
+  method = function(x, y) bhattacharyya
+)
+
+bhattacharyya_matrix <- proxy::dist(
+  depth_binned_wide, bhattacharyya, convert_similarities = FALSE
+)
 
 
 ## Plot heat maps and clusters ------------------------------------------------
@@ -175,7 +235,8 @@ dendro_data_k <- function(hc, k) {
 ## Pass depth_binned as `depth_data`
 ## Past results of hierarchical clustering (i.e. clusters$...) as cluster_data
 cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habitats, 
-                            max_depth = 100, tree_depth = 80) {
+                            max_depth = 100, tree_depth = 80, tile_border = 0.6, 
+                            tree_spacing = 1) {
   
   require("tidyverse")
   require("ggtext")
@@ -191,8 +252,8 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
   cluster_ggdata <- dendro_data_k(cluster_data, k)
   ## Shift and rescale dendrogram for plotting beside heatmap
   cluster_ggdata <- cluster_ggdata$segments %>% 
-    mutate(y = 1 + max_depth + ((y/max(yend)) * tree_depth),
-           yend = 1 + max_depth + ((yend/max(yend)) * tree_depth), 
+    mutate(y = tree_spacing + max_depth + ((y/max(yend)) * tree_depth),
+           yend = tree_spacing + max_depth + ((yend/max(yend)) * tree_depth), 
            line = factor(clust == 0))
   
   ## Select vertices at which to place cluster labels
@@ -223,11 +284,11 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
   depth_data %>% 
     filter(Depth <= max_depth) %>% 
     ggplot(aes(Depth, Species_label, fill = p)) + 
-    geom_tile(color = "black", size = 0.6) + 
+    geom_tile(color = "black", size = tile_border) + 
     geom_segment(aes(x = y, y = x, xend = yend, yend = xend, linetype = line, color = clust), 
                  data = cluster_ggdata, size = 0.8, inherit.aes = FALSE, 
                  show.legend = FALSE) +
-    geom_text(aes(x = yend, y = xend, label = rank, color = rank), nudge_x = 3,
+    geom_text(aes(x = yend, y = xend, label = rank, color = rank), nudge_x = 0.038 * tree_depth,
               data = cluster_labels, inherit.aes = FALSE, show.legend = FALSE, 
               fontface = "bold") + 
     scale_fill_viridis_c(option = "inferno") + 
@@ -253,22 +314,54 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
   
 }
 
-## Cluster by Bhattacharyya (dis)similarity
+## Plot: Clustered by Bhattacharyya (dis)similarity; depth displayed up to 100 m
 bhattacharyya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 6)
 
-ggsave("./output/bhattacharyya_heatmap.png", height = 5, width = 8, 
+ggsave("./output/bhattacharyya_heatmap.png", bhattacharyya_heatmap, height = 5, width = 8, 
        units = "in", dpi = 500)
 
 
-## Cluster by Schoener's D
+## Plot: Clustered by Bhattacharyya (dis)similarity; all depth bins displayed
+bhattacharyya_heatmap_1500m <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 6, 
+                                               max_depth = 1510, tree_depth = 1000, 
+                                               tile_border = 0, tree_spacing = 10) + 
+  scale_x_continuous(breaks = seq(0, 1500, 100)) + 
+  theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
+
+ggsave("./output/bhattacharyya_heatmap_1500m.png", bhattacharyya_heatmap_1500m, height = 6, 
+       width = 9, units = "in", dpi = 500)
+
+
+## Plot: Clustered by Schoener's D; depth displayed up to 100m
 schoener_heatmap <- cluster_heatmap(depth_binned, clusters$schoener, k = 6)
 
-ggsave("./output/schoener_heatmap.png", height = 5, width = 8, 
+ggsave("./output/schoener_heatmap.png", schoener_heatmap, height = 5, width = 8, 
        units = "in", dpi = 500)
 
 
-## Cluster by Euclidian distance
+## Plot: Clustered by Schoener's D; all depth bins displayed
+schoener_heatmap_1500m <- cluster_heatmap(depth_binned, clusters$schoener, k = 6, 
+                                          max_depth = 1510, tree_depth = 1000, 
+                                          tile_border = 0, tree_spacing = 10) + 
+  scale_x_continuous(breaks = seq(0, 1500, 100)) + 
+  theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
+
+ggsave("./output/schoener_heatmap_1500m.png", schoener_heatmap_1500m, height = 5, width = 8, 
+       units = "in", dpi = 500)
+
+
+## Plot: Clustered by Euclidian distance; depth displayed up to 100m
 euclidian_heatmap <- cluster_heatmap(depth_binned, clusters$euclidian, k = 6)
 
-ggsave("./output/euclidian_heatmap.png", height = 5, width = 8, 
+ggsave("./output/euclidian_heatmap.png", euclidian_heatmap, height = 5, width = 8, 
+       units = "in", dpi = 500)
+
+## Plot: Clustered by Euclidian distance; all depth bins diplayed
+euclidian_heatmap_1500m <- cluster_heatmap(depth_binned, clusters$euclidian, k = 6, 
+                                           max_depth = 1510, tree_depth = 1000, 
+                                           tile_border = 0, tree_spacing = 10) + 
+  scale_x_continuous(breaks = seq(0, 1500, 100)) + 
+  theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
+
+ggsave("./output/euclidian_heatmap_1500m.png", euclidian_heatmap_1500m, height = 5, width = 8, 
        units = "in", dpi = 500)
