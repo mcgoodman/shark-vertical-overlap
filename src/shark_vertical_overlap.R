@@ -131,8 +131,8 @@ bhattacharyya_plot <- bhattacharyya_long %>%
   scale_fill_viridis_c(option = "magma") + 
   theme_minimal() + 
   theme(axis.title = element_blank(),
-        axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5), 
-        axis.text.y = element_text(color = "black"),
+        axis.text.x = element_text(color = "black", face = "bold", angle = 90, hjust = 1, vjust = 0.5), 
+        axis.text.y = element_text(color = "black", face = "bold"),
         legend.position = c(0.75, 0.75), 
         legend.direction = "horizontal") + 
   guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
@@ -174,16 +174,6 @@ fviz_nbclust(
 ) + ggtitle("Euclidian distance")
 
 ggsave("./output/cluster_number_euclidian.png")
-
-## Compute Bhattacharyya's coefficient and save output
-bhattacharyya_matrix <- proxy::dist(
-  depth_binned_wide, 
-  method = function(x, y) bhattacharyya
-)
-
-bhattacharyya_matrix <- proxy::dist(
-  depth_binned_wide, bhattacharyya, convert_similarities = FALSE
-)
 
 
 ## Plot heat maps and clusters ------------------------------------------------
