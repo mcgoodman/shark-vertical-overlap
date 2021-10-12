@@ -303,9 +303,8 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
 }
 
 ## Plot: Clustered by Bhattacharyya (dis)similarity; depth displayed up to 100 m
-bhattacharyya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 4) + 
-  viridis::scale_fill_viridis(option = "rocket")
-  scale_fill_viridis_c(option = "cividis", limits = c(0, 0.5), breaks = seq(0, 0.5, 0.1))
+bhattacharyya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 4) +
+  scale_fill_viridis_c(option = "inferno", limits = c(0, 0.5), breaks = seq(0, 0.5, 0.1))
 
 ggsave("./output/bhattacharyya_heatmap.png", bhattacharyya_heatmap, height = 5, width = 8, 
        units = "in", dpi = 500)
