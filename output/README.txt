@@ -1,10 +1,10 @@
 
-**median_depths.csv**
-daily median depths, by individual, for each species
+**individual_proprtion_time_at_depth.csv**
+Proportion time at depth, summarized for each individual
 
 **depth_binned.csv**
-summary of daily median depth distribution for each species, 
-aggregated into 10 meter depth bins
+summary of proportion time at depth averaged across all 
+individuals within each species.
 
 **distance_matrices.rds**
 Distance matrices (Bhattacharyya, Schoener's D, and Euclidian) used 
@@ -20,9 +20,9 @@ column (up to 100 meters), and hierarchical clustering tree based
 on Bhattacharrya's dissimilarity. Analagous plots are provided for
 Schoener's D and Euclidian distance.
 
-**bhattacharyya_heatmap_1500m.png**
+**bhattacharyya_heatmap_full.png**
 Heatmap showing depth distributions of each species in the water
-column (up to 1510 meters), and hierarchical clustering tree based
+column (up to 1800 meters), and hierarchical clustering tree based
 on Bhattacharrya's dissimilarity. Analagous plots are provided for
 Schoener's D and Euclidian distance.
 
