@@ -67,6 +67,8 @@ depth_binned <- tag_depths_binned %>%
   group_by(Species, Depth_bin) %>%
   summarize(p = mean(p))
   
+depth_binned$Species[depth_binned$Species == "Chilean devil ray"] <- "sicklefin devil ray"
+
 write.csv(depth_binned, "./output/depth_binned.csv")
 
 ## Pivot to wide format for calculating distance matrices
@@ -105,41 +107,6 @@ simils <- list(
 )
 
 saveRDS(simils, "./output/similarity_matrices.rds")
-
-## Format Bhattacharyya similarity matrix for plotting
-bhattacharyya_long <- as.matrix(simils$bhattacharyya)
-bhattacharyya_long[upper.tri(bhattacharyya_long)] <- NA
-bhattacharyya_long <- data.frame(
-  species1 = colnames(bhattacharyya_long)[col(bhattacharyya_long)], 
-  species2 = rownames(bhattacharyya_long)[row(bhattacharyya_long)], 
-  bhattacharyya = c(bhattacharyya_long)
-)
-bhattacharyya_long <- na.omit(bhattacharyya_long)
-
-## Plot Bhattacharyya similarity matrix
-bhattacharyya_plot <- bhattacharyya_long %>% 
-  mutate(species2 = forcats::fct_rev(species2)) %>% 
-  ggplot(aes(species1, species2, fill = bhattacharyya)) + 
-  geom_tile(color = "black", size = 0.6) + 
-  scale_fill_viridis_c(option = "magma", breaks = seq(0, 1, 0.25), limits = c(0, 1), 
-                       labels = c("0", "0.25", "0.5", "0.75", "1")) + 
-  theme_minimal() + 
-  theme(axis.title = element_blank(),
-        axis.text.x = element_text(color = "black", face = "bold", angle = 90, hjust = 1, vjust = 0.5), 
-        axis.text.y = element_text(color = "black", face = "bold"),
-        legend.position = c(0.75, 0.76), 
-        legend.direction = "horizontal", 
-        plot.background = element_rect(fill = "White")) + 
-  guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
-                               title.hjust = 0.5, barwidth = 10, barheight = 0.7, 
-                               ticks.linewidth = 1, ticks.colour = "black", 
-                               frame.colour = "black", frame.linewidth = 1)) + 
-  coord_fixed()
-
-
-ggsave("./output/bhattacharyya_matrix.png", bhattacharyya_plot, height = 7, 
-       width = 7, units = "in", dpi = 500)
-
 
 ## Hierarchical clustering ----------------------------------------------------
 
@@ -302,9 +269,14 @@ cluster_heatmap <- function(depth_data, cluster_data, k, habitats = species_habi
   
 }
 
-## Plot: Clustered by Bhattacharyya (dis)similarity; depth displayed up to 100 m
-bhattacharyya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 4) +
-  scale_fill_viridis_c(option = "inferno", limits = c(0, 0.5), breaks = seq(0, 0.5, 0.1))
+## Plot: Clustered by Bhattacharyya (dis)similarity; depth displayed up to 150 m
+bhattacharyya_heatmap <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 4, 
+                                         max_depth = 150, tree_depth = 100, 
+                                         tree_spacing = 1.5) +
+  scale_fill_viridis_c(option = "inferno", limits = c(0, 0.5), breaks = seq(0, 0.5, 0.1)) + 
+  scale_x_continuous(breaks = seq(0, 150, 10), 
+                     labels = ifelse(seq(0, 150, 10) %in% seq(0, 140, 20), 
+                                     "", seq(0, 150, 10)))
 
 ggsave("./output/bhattacharyya_heatmap.png", bhattacharyya_heatmap, height = 5, width = 8, 
        units = "in", dpi = 500)
@@ -314,43 +286,51 @@ ggsave("./output/bhattacharyya_heatmap.png", bhattacharyya_heatmap, height = 5, 
 bhattacharyya_heatmap_full <- cluster_heatmap(depth_binned, clusters$bhattacharyya, k = 4, 
                                                max_depth = depth_max, tree_depth = 1000, 
                                                tile_border = 0, tree_spacing = 10) + 
+  scale_fill_viridis_c(option = "inferno", limits = c(0, 0.5), breaks = seq(0, 0.5, 0.1)) +
   scale_x_continuous(breaks = seq(0, depth_max, 100)) + 
   theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
 
 ggsave("./output/bhattacharyya_heatmap_full.png", bhattacharyya_heatmap_full, height = 6, 
        width = 9, units = "in", dpi = 500)
 
+### Plot Similarity Matrix ----------------------------------------------------
 
-## Plot: Clustered by Schoener's D; depth displayed up to 100m
-schoener_heatmap <- cluster_heatmap(depth_binned, clusters$schoener, k = 4)
+## Reorder Bhattacharyya similarity matrix by clustering results
+bhattacharyya_order <- rev(clusters$bhattacharyya$labels[clusters$bhattacharyya$order])
+simils$bhattacharyya <- proxy::simil(depth_binned_wide[bhattacharyya_order,], 
+                                     method = bhattacharyya, dist = FALSE)
 
-ggsave("./output/schoener_heatmap.png", schoener_heatmap, height = 5, width = 8, 
-       units = "in", dpi = 500)
+## Format Bhattacharyya similarity matrix for plotting
+bhattacharyya_long <- as.matrix(simils$bhattacharyya)
+bhattacharyya_long[upper.tri(bhattacharyya_long)] <- NA
+bhattacharyya_long <- data.frame(
+  species1 = colnames(bhattacharyya_long)[col(bhattacharyya_long)], 
+  species2 = rownames(bhattacharyya_long)[row(bhattacharyya_long)], 
+  bhattacharyya = c(bhattacharyya_long)
+)
+bhattacharyya_long <- na.omit(bhattacharyya_long)
+
+## Plot Bhattacharyya similarity matrix
+bhattacharyya_plot <- bhattacharyya_long %>% 
+  mutate(species1 = factor(species1, levels = bhattacharyya_order), 
+         species2 = fct_rev(factor(species2, levels = bhattacharyya_order))) %>% 
+  ggplot(aes(species1, species2, fill = bhattacharyya)) + 
+  geom_tile(color = "black", size = 0.6) + 
+  scale_fill_viridis_c(option = "magma", breaks = seq(0, 1, 0.25), limits = c(0, 1), 
+                       labels = c("0", "0.25", "0.5", "0.75", "1")) + 
+  theme_minimal() + 
+  theme(axis.title = element_blank(),
+        axis.text.x = element_text(color = "black", face = "bold", angle = 90, hjust = 1, vjust = 0.5), 
+        axis.text.y = element_text(color = "black", face = "bold"),
+        legend.position = c(0.75, 0.76), 
+        legend.direction = "horizontal", 
+        plot.background = element_rect(fill = "White", color = NA)) + 
+  guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
+                               title.hjust = 0.5, barwidth = 10, barheight = 0.7, 
+                               ticks.linewidth = 1, ticks.colour = "black", 
+                               frame.colour = "black", frame.linewidth = 1))
 
 
-## Plot: Clustered by Schoener's D; all depth bins displayed
-schoener_heatmap_full <- cluster_heatmap(depth_binned, clusters$schoener, k = 4, 
-                                          max_depth = depth_max, tree_depth = 1000, 
-                                          tile_border = 0, tree_spacing = 10) + 
-  scale_x_continuous(breaks = seq(0, depth_max, 100)) + 
-  theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
+ggsave("./output/bhattacharyya_matrix.png", bhattacharyya_plot, height = 6, 
+       width = 6, units = "in", dpi = 500)
 
-ggsave("./output/schoener_heatmap_full.png", schoener_heatmap_full, height = 5, width = 8, 
-       units = "in", dpi = 500)
-
-
-## Plot: Clustered by Euclidian distance; depth displayed up to 100m
-euclidian_heatmap <- cluster_heatmap(depth_binned, clusters$euclidian, k = 4)
-
-ggsave("./output/euclidian_heatmap.png", euclidian_heatmap, height = 5, width = 8, 
-       units = "in", dpi = 500)
-
-## Plot: Clustered by Euclidian distance; all depth bins diplayed
-euclidian_heatmap_full <- cluster_heatmap(depth_binned, clusters$euclidian, k = 4, 
-                                           max_depth = depth_max, tree_depth = 1000, 
-                                           tile_border = 0, tree_spacing = 10) + 
-  scale_x_continuous(breaks = seq(0, depth_max, 100)) + 
-  theme(axis.text.x = element_text(color = "black", angle = 90, hjust = 1, vjust = 0.5))
-
-ggsave("./output/euclidian_heatmap_full.png", euclidian_heatmap_full, height = 5, width = 8, 
-       units = "in", dpi = 500)
