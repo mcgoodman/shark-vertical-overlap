@@ -46,7 +46,8 @@ for (i in seq_along(ts_files)) {
 ## Bind individual proportion time at depth data together
 tag_depths_binned <- do.call("rbind", tag_depths_binned)
 
-write.csv(tag_depths_binned, "./output/individual_proportion_time_at_depth.csv")
+write.csv(tag_depths_binned, "./output/individual_proportion_time_at_depth.csv", 
+          row.names = FALSE)
 
 ## Format and summarize data ------------------------------------------
 
@@ -67,9 +68,9 @@ depth_binned <- tag_depths_binned %>%
   group_by(Species, Depth_bin) %>%
   summarize(p = mean(p))
   
-depth_binned$Species[depth_binned$Species == "Chilean devil ray"] <- "sicklefin devil ray"
+depth_binned$Species[depth_binned$Species == "Chilean devil ray"] <- "Sicklefin devil ray"
 
-write.csv(depth_binned, "./output/depth_binned.csv")
+write.csv(depth_binned, "./output/depth_binned.csv", row.names = FALSE)
 
 ## Pivot to wide format for calculating distance matrices
 depth_binned_wide <- depth_binned %>% 
@@ -295,6 +296,60 @@ ggsave("./output/bhattacharyya_heatmap_full.png", bhattacharyya_heatmap_full, he
 
 ### Plot Similarity Matrix ----------------------------------------------------
 
+## Version 1: In alphabetical order
+
+## Reorder Bhattacharyya similarity matrix alphabetically
+bhattacharyya_order <- sort(species_metadata$Species..common.)
+simils$bhattacharyya <- proxy::simil(depth_binned_wide[bhattacharyya_order,], 
+                                     method = bhattacharyya, dist = FALSE)
+
+## Format Bhattacharyya similarity matrix for plotting
+bhattacharyya_long <- as.matrix(simils$bhattacharyya)
+bhattacharyya_long[upper.tri(bhattacharyya_long)] <- NA
+bhattacharyya_long <- data.frame(
+  species1 = colnames(bhattacharyya_long)[col(bhattacharyya_long)], 
+  species2 = rownames(bhattacharyya_long)[row(bhattacharyya_long)], 
+  bhattacharyya = c(bhattacharyya_long)
+)
+bhattacharyya_long <- na.omit(bhattacharyya_long)
+
+## Plot Bhattacharyya similarity matrix in alphabetical order
+bhattacharyya_plot_alpha <- bhattacharyya_long %>% 
+  mutate(species2 = fct_rev(species2)) %>% 
+  ggplot(aes(species1, species2, fill = bhattacharyya)) + 
+  geom_tile(color = "black", size = 0.6) + 
+  scale_fill_viridis_c(option = "magma", breaks = seq(0, 1, 0.25), limits = c(0, 1), 
+                       labels = c("0", "0.25", "0.5", "0.75", "1")) + 
+  theme_minimal() + 
+  theme(axis.title = element_blank(),
+        axis.text.x = element_text(color = "black", face = "bold", angle = 90, hjust = 1, vjust = 0.5), 
+        axis.text.y = element_text(color = "black", face = "bold"),
+        legend.position = c(0.72, 0.76), 
+        legend.direction = "horizontal", 
+        plot.background = element_rect(fill = "White", color = NA)) + 
+  guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
+                               title.hjust = 0.5, barwidth = 10, barheight = 0.7, 
+                               ticks.linewidth = 1, ticks.colour = "black", 
+                               frame.colour = "black", frame.linewidth = 1))
+
+ggsave(
+  "./output/bhattacharyya_matrix_alpha.png", 
+  bhattacharyya_plot_alpha + 
+    theme(panel.grid = element_blank()) + 
+    coord_cartesian(expand = FALSE),
+  height = 6, width = 6, units = "in", dpi = 500
+)
+
+ggsave(
+  "./output/bhattacharyya_matrix_alpha_border.png", 
+  bhattacharyya_plot_alpha + 
+    theme(panel.border = element_rect(fill = NA, color = "black")) + 
+    coord_cartesian(clip = "off", expand = FALSE),
+  height = 6, width = 6, units = "in", dpi = 500
+)
+
+## Version 2: In order of clustering results
+
 ## Reorder Bhattacharyya similarity matrix by clustering results
 bhattacharyya_order <- rev(clusters$bhattacharyya$labels[clusters$bhattacharyya$order])
 simils$bhattacharyya <- proxy::simil(depth_binned_wide[bhattacharyya_order,], 
@@ -310,8 +365,8 @@ bhattacharyya_long <- data.frame(
 )
 bhattacharyya_long <- na.omit(bhattacharyya_long)
 
-## Plot Bhattacharyya similarity matrix
-bhattacharyya_plot <- bhattacharyya_long %>% 
+## Plot Bhattacharyya similarity matrix in order of clustering output
+bhattacharyya_plot_clust <- bhattacharyya_long %>% 
   mutate(species1 = factor(species1, levels = bhattacharyya_order), 
          species2 = fct_rev(factor(species2, levels = bhattacharyya_order))) %>% 
   ggplot(aes(species1, species2, fill = bhattacharyya)) + 
@@ -322,7 +377,7 @@ bhattacharyya_plot <- bhattacharyya_long %>%
   theme(axis.title = element_blank(),
         axis.text.x = element_text(color = "black", face = "bold", angle = 90, hjust = 1, vjust = 0.5), 
         axis.text.y = element_text(color = "black", face = "bold"),
-        legend.position = c(0.75, 0.76), 
+        legend.position = c(0.72, 0.76), 
         legend.direction = "horizontal", 
         plot.background = element_rect(fill = "White", color = NA)) + 
   guides(fill = guide_colorbar("Bhattacharyya's coefficient", title.position = "top", 
@@ -330,7 +385,19 @@ bhattacharyya_plot <- bhattacharyya_long %>%
                                ticks.linewidth = 1, ticks.colour = "black", 
                                frame.colour = "black", frame.linewidth = 1))
 
+ggsave(
+  "./output/bhattacharyya_matrix_clust.png", 
+  bhattacharyya_plot_clust + 
+    theme(panel.grid = element_blank()) + 
+    coord_cartesian(expand = FALSE),
+  height = 6, width = 6, units = "in", dpi = 500
+)
 
-ggsave("./output/bhattacharyya_matrix.png", bhattacharyya_plot, height = 6, 
-       width = 6, units = "in", dpi = 500)
+ggsave(
+  "./output/bhattacharyya_matrix_clust_border.png", 
+  bhattacharyya_plot_clust + 
+    theme(panel.border = element_rect(fill = NA, color = "black")) + 
+    coord_cartesian(clip = "off", expand = FALSE),
+  height = 6, width = 6, units = "in", dpi = 500
+)
 
